@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Chibson</title>
+<style>
+:root{--bg:#212121;--side:#171717;--panel:#2f2f2f;--text:#ececec;--muted:#9b9b9b;--line:#3a3a3a;--accent:#10a37f;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#fff;--side:#f7f7f8;--panel:#f0f0f1;--text:#1f1f1f;--muted:#6b6b6b;--line:#e2e2e4;color-scheme:light}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;-webkit-text-size-adjust:100%}
+body{height:100dvh;padding-top:env(safe-area-inset-top);background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;-webkit-appearance:none;appearance:none}
+.lg{display:grid;place-items:center;border-radius:50%;overflow:hidden;background:var(--accent);color:#fff;flex:none;font-size:15px}
+.lg img{width:100%;height:100%;object-fit:cover}
+.av{width:30px;height:30px}.big{width:56px;height:56px;font-size:28px;margin:0 auto 12px}
+#app{display:flex;height:100%}
+aside{width:260px;background:var(--side);padding:12px;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--line);transition:transform .2s;z-index:3}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;padding:4px}
+#new{text-align:left}
+#list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.it{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:14px}
+.it span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it:hover,.it.on{background:var(--panel)}
+.x{border:0;background:none;padding:0 4px;color:var(--muted)}
+.model{font-size:12px;color:var(--muted);word-break:break-all}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+#menu{display:none;padding:4px 10px}
+#title{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#msgs{flex:1;overflow-y:auto;padding:20px 14px}
+#empty{max-width:640px;margin:12vh auto 0;text-align:center}
+#empty h2{margin:0 0 20px;font-size:26px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{background:none;text-align:left;font-size:14px;color:var(--muted);border-radius:14px;padding:12px}
+.row{max-width:760px;margin:0 auto 22px;display:flex;gap:12px}
+.row.user{justify-content:flex-end}
+.row.user .bub{background:var(--panel);padding:8px 16px;border-radius:20px;max-width:82%;white-space:pre-wrap;word-break:break-word}
+.col{min-width:0;flex:1}
+.bub{word-break:break-word}
+.bub pre{background:#0d0d0d;color:#e6e6e6;padding:12px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5;margin:8px 0}
+.bub code{background:var(--panel);padding:1px 5px;border-radius:5px;font-size:13px}
+.bub pre code{background:none;padding:0}
+.li{display:flex;gap:8px}.li span{flex:none}
+.acts{display:flex;gap:6px;margin-top:6px}
+.acts button{background:none;border:0;color:var(--muted);font-size:12px;padding:2px 6px}
+.bar{max-width:760px;width:100%;margin:0 auto;padding:0 14px calc(14px + env(safe-area-inset-bottom))}
+.box{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border-radius:26px;padding:8px 8px 8px 18px}
+textarea{flex:1;background:none;border:0;outline:0;color:inherit;font:inherit;font-size:16px;resize:none;max-height:160px;padding:6px 0;-webkit-appearance:none;appearance:none}
+#send{border-radius:50%;width:34px;height:34px;padding:0;background:var(--text);color:var(--bg);border:0}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;padding:20px;z-index:9;overflow-y:auto}
+.card{width:100%;max-width:440px;text-align:center}
+.card h2{margin:4px 0;font-size:26px}.card p{color:var(--muted);margin:0 0 20px}
+.pick{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.drop{position:relative;display:block;border:2px dashed var(--line);border-radius:16px;padding:40px 16px;background:var(--side)}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--panel)}
+.prog{margin-top:20px;text-align:left;display:none}
+.stage{opacity:.35;transition:opacity .2s}.stage.on{opacity:1}
+.lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.track{height:8px;background:var(--panel);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.fill{height:100%;width:0;background:var(--accent);transition:width .15s}
+.err{color:#e5484d;margin-top:12px;font-size:13px}
+.link{background:none;border:0;color:var(--muted);margin-top:16px;font-size:13px;text-decoration:underline}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:20;padding:20px}
+#modal .card{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
+.grid button{font-size:22px;padding:6px}
+.grid button.sel{outline:2px solid var(--accent)}
+.sw{height:30px;border-radius:50%;padding:0;border:2px solid transparent}.sw.sel{border-color:var(--text)}
+.ov{display:none}
+@media(max-width:760px){
+ aside{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);padding-top:calc(12px + env(safe-area-inset-top))}
+ body.sb aside{transform:none}body.sb .ov{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2}
+ #menu{display:block}.chips{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="gate">
+ <div class="card">
+  <div class="lg big" style="width:64px;height:64px;font-size:32px"></div>
+  <h2>Chibson</h2>
+  <p>GGUF 모델 파일을 올리면 Chibson이 깨어납니다.</p>
+  <label class="drop" id="drop"><input id="file" type="file" class="pick"><b>.gguf 파일 선택</b><br><span style="color:var(--muted);font-size:13px">또는 여기로 끌어다 놓기</span></label>
+  <div class="prog" id="prog">
+   <div id="l0" style="font-size:13px;color:var(--muted);margin-bottom:10px;word-break:break-all"></div>
+   <div class="stage on" id="s1"><div class="lab"><span>1. 업로드</span><span id="p1">0%</span></div><div class="track"><div class="fill" id="f1"></div></div></div>
+   <div class="stage" id="s2"><div class="lab"><span>2. 모델 로딩</span><span id="p2">0%</span></div><div class="track"><div class="fill" id="f2"></div></div></div>
+  </div>
+  <div class="err" id="err">⚠ 스크립트가 실행되지 않았어요. 파일을 다운로드해서 브라우저로 직접 열어 주세요.</div>
+  <button class="link" id="gset">로고 바꾸기</button>
+ </div>
+</div>
+
+<div id="app">
+ <div class="ov" id="ov"></div>
+ <aside>
+  <div class="brand"><div class="lg" style="width:30px;height:30px"></div>Chibson</div>
+  <button id="new">＋ 새 채팅</button>
+  <div id="list"></div>
+  <div class="model" id="mname"></div>
+  <button id="set">⚙ 로고 설정</button>
+ </aside>
+ <main>
+  <header><button id="menu">☰</button><span id="title">새 채팅</span></header>
+  <div id="msgs"></div>
+  <div class="bar">
+   <div class="box"><textarea id="inp" rows="1" placeholder="Chibson에게 메시지 보내기"></textarea><button id="send">↑</button></div>
+   <div class="hint">모든 처리는 이 기기 안에서만 이루어져요. 파일은 서버로 전송되지 않아요.</div>
+  </div>
+ </main>
+</div>
+
+<div id="modal"><div class="card">
+ <b>로고 선택</b>
+ <div class="grid" id="emo"></div>
+ <div class="grid" id="col"></div>
+ <label class="drop" style="padding:14px"><input id="img" type="file" accept="image/*" class="pick">📷 내 사진으로 로고 만들기</label>
+ <button id="mclose" style="margin-top:14px;width:100%">완료</button>
+</div></div>
+
+<script>
+document.getElementById('err').textContent='';
+window.addEventListener('error',e=>{document.getElementById('err').textContent='오류: '+e.message});
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const NO_RT='⚠ 이 미리보기 환경에서는 모델 실행 엔진(WebAssembly)을 불러올 수 없어서 업로드와 화면까지만 동작해요. 일반 웹 호스팅에 올려 Safari로 열면 실제 답변이 나옵니다.';
+const IDK='나는 Chibson이야. 무엇이든 물어봐!', IDE='I am Chibson. Ask me anything!';
+const ID_RE=/너.{0,6}(누구|뭐야|이름|정체)|이름이?\s*뭐|누가\s*(만들|개발)|who are you|your name|who (made|created|built)|what are you/i;
+const BRAND=/Anthropic|Claude|OpenAI|ChatGPT|Qwen|Alibaba|DeepSeek|Mistral/gi;
+const RULE='너의 이름은 Chibson이다. 너는 다른 회사의 AI가 아니라 Chibson이다. 이름이나 정체를 물으면 "나는 Chibson이야"라고만 답한다. 반드시 한국어로만 답한다. 영어로 답하지 않는다.';
+const SYS={role:'system',content:'You are Chibson. Your name is Chibson. You are not made by Anthropic, OpenAI or any other company. ALWAYS reply in Korean (한국어) only.'};
+const SEED=[
+ {role:'user',content:'너 누구야?'},{role:'assistant',content:IDK},
+ {role:'user',content:'안녕! 파이썬이 뭐야?'},{role:'assistant',content:'안녕하세요! 파이썬은 문법이 쉬워서 입문자에게 인기 있는 프로그래밍 언어예요. 웹, 데이터 분석, 인공지능 등 다양한 곳에 쓰여요.'}];
+const SUG=['오늘 저녁 메뉴 추천해줘','파이썬 기초를 알려줘','이메일 답장 써줘','재미있는 이야기 해줘'];
+const EMO=['🤖','🧠','✨','🦊','🐱','🐼','🌙','🔥','🌱','⚡','🎧','💬'];
+const COL=['#10a37f','#6366f1','#ef4444','#f59e0b','#ec4899','#0ea5e9','#111827','#8b5cf6','#14b8a6','#84cc16','#f97316','#64748b'];
+let logo=ld('cb_logo',{t:'e',v:'🤖',c:'#10a37f'}),chats=ld('cb_chats',[]),cur=null,wllama=null,busy=false,stopF=false,ctl=null;
+
+function applyLogo(){
+ document.documentElement.style.setProperty('--accent',logo.c);
+ document.querySelectorAll('.lg').forEach(e=>{e.innerHTML=logo.t==='i'?'<img alt="" src="'+logo.v+'">':logo.v});
+}
+function md(t){
+ return t.split('```').map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/^\w*\n/,''))+'</code></pre>':
+  esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')
+  .replace(/^(\d+)\. (.*)$/gm,'<div class="li"><span>$1.</span>$2</div>').replace(/^[-*] (.*)$/gm,'<div class="li"><span>•</span>$1</div>')
+  .replace(/<\/div>\n/g,'</div>').replace(/\n/g,'<br>')).join('');
+}
+const cc=()=>chats.find(x=>x.id===cur);
+function drawList(){
+ $('list').innerHTML='';
+ chats.forEach(c=>{const d=document.createElement('div');d.className='it'+(c.id===cur?' on':'');
+  d.innerHTML='<span></span><button class="x">×</button>';d.firstChild.textContent=c.title;
+  d.onclick=()=>{if(busy)return;cur=c.id;render();document.body.classList.remove('sb')};
+  d.querySelector('.x').onclick=e=>{e.stopPropagation();if(busy)return;chats=chats.filter(z=>z.id!==c.id);if(cur===c.id)cur=null;sv('cb_chats',chats);render()};
+  $('list').appendChild(d)});
+}
+function addRow(x,last){
+ const r=document.createElement('div');r.className='row '+x.role;
+ if(x.role==='user'){r.innerHTML='<div class="bub"></div>';r.firstChild.textContent=x.content}
+ else{r.innerHTML='<div class="lg av"></div><div class="col"><div class="bub"></div><div class="acts"><button class="cp">복사</button>'+(last?'<button class="rg">다시 생성</button>':'')+'</div></div>';
+  r.querySelector('.bub').innerHTML=md(x.content);
+  r.querySelector('.cp').onclick=e=>{try{navigator.clipboard.writeText(x.content);e.target.textContent='복사됨'}catch(_){}};
+  const rg=r.querySelector('.rg');if(rg)rg.onclick=regen}
+ $('msgs').appendChild(r);
+}
+function render(){
+ const c=cc(),m=$('msgs');m.innerHTML='';$('title').textContent=c?c.title:'새 채팅';
+ if(!c||!c.msgs.length){m.innerHTML='<div id="empty"><div class="lg big"></div><h2>무엇을 도와드릴까요?</h2><div class="chips">'+SUG.map(s=>'<button class="chip">'+s+'</button>').join('')+'</div></div>';
+  m.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{$('inp').value=b.textContent;send()})}
+ else c.msgs.forEach((x,i)=>addRow(x,i===c.msgs.length-1&&!busy));
+ applyLogo();drawList();m.scrollTop=1e9;
+}
+function setBusy(b){busy=b;stopF=false;$('send').textContent=b?'■':'↑'}
+async function gen(){
+ const c=cc(),um=c.msgs[c.msgs.length-1].content,ko=/[가-힣]/.test(um);let text='',en='';
+ const hist=c.msgs.map((m,i)=>i===c.msgs.length-1?{role:'user',content:'['+RULE+']\n\n'+m.content+'\n\n(한국어로만 답해줘)'}:m);
+ c.msgs.push({role:'assistant',content:''});setBusy(true);render();
+ const bub=[...document.querySelectorAll('.row.assistant .bub')].pop();bub.textContent='…';
+ const run=async msgs=>{ctl=new AbortController();text='';
+  const st=await wllama.createChatCompletion(msgs,{nPredict:640,sampling:{temp:0.6},stream:true,useCache:true,abortSignal:ctl.signal});
+  for await(const x of st){if(stopF)break;text=x.currentText.replace(BRAND,'Chibson');bub.innerHTML=md(text);$('msgs').scrollTop=1e9}};
+ try{
+  await run([SYS,...SEED,...hist]);en=text;
+  const L=text.match(/[A-Za-z가-힣]/g)||[],H=text.match(/[가-힣]/g)||[];
+  if(!stopF&&ko&&L.length>15&&H.length/L.length<0.3){bub.textContent='한국어로 바꾸는 중…';
+   await run([{role:'user',content:'다음 글을 자연스러운 한국어로만 번역해줘. 설명 없이 번역문만 써줘.\n\n'+en}]);if(!text.trim())text=en}
+ }catch(e){if(!text)text=en||'오류: '+(e.message||e)}
+ c.msgs[c.msgs.length-1].content=text||'(응답 없음)';sv('cb_chats',chats);setBusy(false);render();
+}
+async function send(){
+ const t=$('inp').value.trim();if(!t||busy)return;
+ let c=cc();if(!c){c={id:Date.now(),title:t.slice(0,24),msgs:[]};chats.unshift(c);cur=c.id}
+ $('inp').value='';$('inp').style.height='auto';c.msgs.push({role:'user',content:t});
+ if(!wllama){c.msgs.push({role:'assistant',content:NO_RT});render();return}
+ if(ID_RE.test(t)){c.msgs.push({role:'assistant',content:/[가-힣]/.test(t)?IDK:IDE});sv('cb_chats',chats);render();return}
+ await gen();
+}
+function regen(){const c=cc();if(busy||!c)return;c.msgs.pop();gen()}
+$('send').onclick=()=>{if(busy){stopF=true;try{ctl.abort()}catch(e){}}else send()};
+$('inp').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}};
+$('inp').oninput=e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'};
+$('new').onclick=()=>{if(busy)return;cur=null;render();document.body.classList.remove('sb')};
+$('menu').onclick=()=>document.body.classList.add('sb');
+$('ov').onclick=()=>document.body.classList.remove('sb');
+
+/* 로고 선택 */
+function drawPick(){
+ $('emo').innerHTML='';$('col').innerHTML='';
+ EMO.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(logo.t==='e'&&logo.v===e)b.className='sel';b.onclick=()=>{logo.t='e';logo.v=e;saveLogo()};$('emo').appendChild(b)});
+ COL.forEach(c=>{const b=document.createElement('button');b.className='sw'+(logo.c===c?' sel':'');b.style.background=c;b.onclick=()=>{logo.c=c;saveLogo()};$('col').appendChild(b)});
+}
+function saveLogo(){sv('cb_logo',logo);applyLogo();drawPick()}
+const openM=()=>{drawPick();$('modal').style.display='grid'};
+$('set').onclick=openM;$('gset').onclick=openM;$('mclose').onclick=()=>$('modal').style.display='none';
+$('img').addEventListener('click',e=>{e.target.value=''});
+$('img').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(im.width,im.height),cv=document.createElement('canvas');cv.width=cv.height=128;
+  cv.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);logo.t='i';logo.v=cv.toDataURL('image/jpeg',.85);saveLogo()};im.src=r.result};
+ r.readAsDataURL(f)});
+
+/* 업로드 + 모델 로딩 */
+async function loadLib(){
+ for(const ver of ['2.3.0','2.2.1','2.1.4']){
+  const V='https://cdn.jsdelivr.net/npm/@wllama/wllama@'+ver+'/esm/';
+  try{const {Wllama}=await import(V+'index.js');
+   return new Wllama({'single-thread/wllama.wasm':V+'single-thread/wllama.wasm','multi-thread/wllama.wasm':V+'multi-thread/wllama.wasm'})}
+  catch(e){console.warn('wllama',ver,e)}}
+ throw new Error('엔진을 불러오지 못했어요');
+}
+const setP=(n,v)=>{const p=Math.min(100,Math.round(v));$('p'+n).textContent=p+'%';$('f'+n).style.width=p+'%'};
+async function start(file){
+ $('err').textContent='';
+ if(!/\.gguf$/i.test(file.name)){$('err').textContent='.gguf 파일만 올릴 수 있어요.';return}
+ $('prog').style.display='block';$('l0').textContent=file.name+' ('+(file.size/1048576).toFixed(0)+' MB)';
+ try{
+  const r=file.stream().getReader();let got=0;
+  for(;;){const {done,value}=await r.read();if(done)break;got+=value.length;setP(1,got/file.size*100)}
+  setP(1,100);$('s2').classList.add('on');
+  try{if(!wllama)wllama=await loadLib();
+   await wllama.loadModel([file],{n_ctx:2048,progressCallback:({loaded,total})=>setP(2,loaded/total*100)})}
+  catch(e){console.warn(e);wllama=false}
+  setP(2,100);$('mname').textContent=file.name;$('gate').style.display='none';cur=null;render();$('inp').focus();
+ }catch(e){$('err').textContent='파일을 읽지 못했어요: '+(e.message||e)}
+}
+$('file').addEventListener('click',e=>{e.target.value=''});
+$('file').addEventListener('change',e=>{const f=e.target.files[0];if(f)start(f)});
+const d=$('drop');
+d.ondragover=e=>{e.preventDefault();d.classList.add('over')};d.ondragleave=()=>d.classList.remove('over');
+d.ondrop=e=>{e.preventDefault();d.classList.remove('over');e.dataTransfer.files[0]&&start(e.dataTransfer.files[0])};
+applyLogo();render();
+</script>
+</body>
+</html>
